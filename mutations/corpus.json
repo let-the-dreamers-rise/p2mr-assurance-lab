@@ -217,6 +217,30 @@
       "expected": "accept",
       "reason": "a different leaf of the same tree, presented with its own script and control block, must validate",
       "citation": "BIP 360, Script Validation: any committed leaf path recomputes to q."
+    },
+    {
+      "id": "mut_accept_depth_128",
+      "category": "sanity_accept",
+      "operation": {"op": "accept_depth_chain", "depth": 128},
+      "expected": "accept",
+      "reason": "a control block at the maximum permitted depth m=128 must validate",
+      "citation": "BIP 360, Script Validation: m is an integer between 0 and 128, inclusive."
+    },
+    {
+      "id": "mut_spk_program_length_31",
+      "category": "script_pubkey_shape",
+      "operation": {"op": "spk_program_length", "length": 31},
+      "expected": "reject",
+      "reason": "a 31-byte witness program is not a P2MR output",
+      "citation": "BIP 360, ScriptPubKey: OP_2 OP_PUSHBYTES_32 <32-byte hash>."
+    },
+    {
+      "id": "mut_spk_program_length_33",
+      "category": "script_pubkey_shape",
+      "operation": {"op": "spk_program_length", "length": 33},
+      "expected": "reject",
+      "reason": "a 33-byte witness program is not a P2MR output",
+      "citation": "BIP 360, ScriptPubKey: OP_2 OP_PUSHBYTES_32 <32-byte hash>."
     }
   ]
 }

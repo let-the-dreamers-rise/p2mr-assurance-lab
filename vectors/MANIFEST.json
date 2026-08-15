@@ -1,8 +1,26 @@
 {
   "upstream_repository": "https://github.com/bitcoin/bips",
   "upstream_commit": "ed4ffcb6a48d4dc4fdfc11cdba783c233db8c66e",
-  "upstream_path": "bip-0360/ref-impl/common/tests/data/p2mr_construction.json",
-  "fixture": "p2mr_construction.json",
-  "sha256": "cd02da0b3c5bcbea98ed4d3141ebaf71344ee5acc8eb543841b7d2ed853251c7",
-  "note": "Byte-identical copy of the official BIP 360 construction fixture at the pinned commit. verify_vectors.py refuses to run if the local copy's SHA-256 differs from this pin."
+  "artifacts": [
+    {
+      "local": "vectors/p2mr_construction.json",
+      "upstream_path": "bip-0360/ref-impl/common/tests/data/p2mr_construction.json",
+      "sha256": "cd02da0b3c5bcbea98ed4d3141ebaf71344ee5acc8eb543841b7d2ed853251c7",
+      "role": "official BIP 360 construction vectors"
+    },
+    {
+      "local": "vectors/p2mr_pqc_construction.json",
+      "upstream_path": "bip-0360/ref-impl/common/tests/data/p2mr_pqc_construction.json",
+      "sha256": "3bd10ece56cb52c2616d5d7ff341afb5b039bc75a8b55caf680e74805a3cf454",
+      "role": "official BIP 360 PQC construction vectors (not loaded by the reference implementation's own test runner)"
+    },
+    {
+      "local": "differential/upstream/p2mr_ref.py",
+      "upstream_path": "bip-0360/ref-impl/python/p2mr.py",
+      "sha256": "ade7e6099eb722cc2f45fb366b7e89b766da46a0424e2ce3732f9419fc1146e5",
+      "role": "vendored reference implementation under differential test",
+      "license": "BSD-3-Clause (per BIP 360 preamble)"
+    }
+  ],
+  "note": "All artifacts are byte-identical copies of the upstream files at the pinned commit. Every runner refuses to execute if a local copy's SHA-256 deviates from its pin."
 }

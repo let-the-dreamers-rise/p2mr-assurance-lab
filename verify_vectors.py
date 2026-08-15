@@ -7,37 +7,24 @@ SHA-256 matches the pin recorded in vectors/MANIFEST.json -- results against an
 unpinned or altered fixture are meaningless and are not produced.
 """
 
-import hashlib
-import json
 import os
 import sys
 
 import p2mr
 from p2mr import P2MRError
+from pinning import load_manifest, load_pinned_json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+FIXTURES = [
+    ("vectors/p2mr_construction.json", "official BIP 360 construction vectors"),
+    ("vectors/p2mr_pqc_construction.json", "official BIP 360 PQC construction vectors"),
+]
 
 
 def fail(msg: str):
     print(f"FAIL: {msg}")
     sys.exit(1)
-
-
-def load_pinned_fixture():
-    manifest_path = os.path.join(HERE, "vectors", "MANIFEST.json")
-    with open(manifest_path, "r", encoding="utf-8") as f:
-        manifest = json.load(f)
-    fixture_path = os.path.join(HERE, "vectors", manifest["fixture"])
-    with open(fixture_path, "rb") as f:
-        raw = f.read()
-    digest = hashlib.sha256(raw).hexdigest()
-    if digest != manifest["sha256"]:
-        fail(
-            "fixture hash mismatch -- refusing to run against an unpinned fixture\n"
-            f"  expected: {manifest['sha256']}\n"
-            f"  actual:   {digest}"
-        )
-    return manifest, json.loads(raw.decode("utf-8"))
 
 
 def get_tree(given):
@@ -232,17 +219,20 @@ BOUNDARY_TESTS = [
 
 
 def main():
-    manifest, fixture = load_pinned_fixture()
-    vectors = fixture["test_vectors"]
-
-    passed = 0
-    for vector in vectors:
-        try:
-            note = check_vector(vector)
-        except (AssertionError, P2MRError, KeyError) as e:
-            fail(f"vector {vector.get('id', '?')}: {e}")
-        print(f"  PASS  {vector['id']}  ({note})")
-        passed += 1
+    manifest = load_manifest()
+    results = []
+    for path, label in FIXTURES:
+        fixture = load_pinned_json(path)
+        vectors = fixture["test_vectors"]
+        passed = 0
+        for vector in vectors:
+            try:
+                note = check_vector(vector)
+            except (AssertionError, P2MRError, KeyError) as e:
+                fail(f"vector {vector.get('id', '?')} [{path}]: {e}")
+            print(f"  PASS  {vector['id']}  ({note})")
+            passed += 1
+        results.append((label, passed, len(vectors)))
 
     boundary_passed = 0
     for name, test in BOUNDARY_TESTS:
@@ -254,11 +244,13 @@ def main():
         boundary_passed += 1
 
     print()
-    print(f"{passed}/{len(vectors)} official BIP 360 construction vectors PASS (byte-for-byte)")
+    for label, passed, total in results:
+        print(f"{passed}/{total} {label} PASS (byte-for-byte)")
     print(f"{boundary_passed}/{len(BOUNDARY_TESTS)} local boundary tests PASS")
     print(f"pinned: bitcoin/bips @ {manifest['upstream_commit']}")
-    print(f"fixture: {manifest['fixture']}")
-    print(f"sha256:  {manifest['sha256']}")
+    for artifact in manifest["artifacts"]:
+        if artifact["local"].startswith("vectors/"):
+            print(f"fixture: {artifact['local'].split('/')[-1]}  sha256: {artifact['sha256']}")
 
 
 if __name__ == "__main__":

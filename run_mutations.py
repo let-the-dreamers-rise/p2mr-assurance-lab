@@ -8,13 +8,13 @@ must raise P2MRError; the accept case must validate. Exit code 0 only if every
 case behaves as its specification citation requires.
 """
 
-import hashlib
 import json
 import os
 import sys
 
 import p2mr
 from p2mr import P2MRError
+from pinning import load_pinned_json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,15 +24,15 @@ def fail(msg: str):
     sys.exit(1)
 
 
-def load_fixture():
-    with open(os.path.join(HERE, "vectors", "MANIFEST.json"), encoding="utf-8") as f:
-        manifest = json.load(f)
-    path = os.path.join(HERE, "vectors", manifest["fixture"])
-    raw = open(path, "rb").read()
-    if hashlib.sha256(raw).hexdigest() != manifest["sha256"]:
-        fail("fixture hash mismatch -- refusing to run against an unpinned fixture")
-    fixture = json.loads(raw.decode("utf-8"))
-    return {v["id"]: v for v in fixture["test_vectors"]}
+def load_vectors():
+    """Both official fixtures, pin-checked, keyed as (fixture, id)."""
+    out = {}
+    for name, path in (("std", "vectors/p2mr_construction.json"),
+                       ("pqc", "vectors/p2mr_pqc_construction.json")):
+        fixture = load_pinned_json(path)
+        for v in fixture["test_vectors"]:
+            out[(name, v["id"])] = v
+    return out
 
 
 def build_base(vector):
@@ -49,9 +49,32 @@ def leaf_script(leaves, i):
 
 
 def run_case(case, vectors):
-    vector = vectors[case["base_vector"]]
     op = case["operation"]
     kind = op["op"]
+
+    # Synthetic cases need no base vector.
+    if kind == "accept_depth_chain":
+        depth = op["depth"]
+        tree = {"script": "51", "leafVersion": 0xC0}
+        for i in range(depth):
+            tree = [tree, {"script": f"5{(i % 9) + 1}", "leafVersion": 0xC0}]
+        result = p2mr.construct_p2mr(tree)
+        program = p2mr.parse_script_pubkey(result["script_pubkey"])
+        deep_control = result["control_blocks"][0]
+        assert (len(deep_control) - 1) // 32 == depth, "unexpected control depth"
+        return p2mr.validate_script_path(program, bytes.fromhex("51"), deep_control)
+
+    if kind == "spk_program_length":
+        n = op["length"]
+        assert n != 32, "length 32 is the valid case, not a mutation"
+        spk = bytes([0x52, n]) + b"\x07" * n
+        try:
+            p2mr.parse_script_pubkey(spk)
+        except P2MRError:
+            return True
+        raise AssertionError(f"{n}-byte witness program parsed as P2MR")
+
+    vector = vectors[(case.get("fixture", "std"), case["base_vector"])]
     tree, result, leaves = build_base(vector)
     program = p2mr.parse_script_pubkey(result["script_pubkey"])
 
@@ -166,7 +189,7 @@ def run_case(case, vectors):
 
 
 def main():
-    vectors = load_fixture()
+    vectors = load_vectors()
     with open(os.path.join(HERE, "mutations", "corpus.json"), encoding="utf-8") as f:
         corpus = json.load(f)
 

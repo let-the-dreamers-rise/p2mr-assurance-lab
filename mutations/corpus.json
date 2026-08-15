@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "description": "Launch adversarial mutation corpus. Each case starts from an official BIP 360 construction vector, applies one machine-defined mutation, and states the exact expected outcome with its specification citation. Run with: python run_mutations.py",
+  "cases": [
+    {
+      "id": "mut_path_byte_flip_three_leaf_complex",
+      "category": "merkle_path_integrity",
+      "base_vector": "p2mr_three_leaf_complex",
+      "operation": {"op": "path_byte_flip", "leaf_index": 1, "byte_index": 5},
+      "expected": "reject",
+      "reason": "one flipped byte in the merkle path changes the recomputed root",
+      "citation": "BIP 360, Script Validation: 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_path_byte_flip_two_leaf",
+      "category": "merkle_path_integrity",
+      "base_vector": "p2mr_two_leaf_same_version",
+      "operation": {"op": "path_byte_flip", "leaf_index": 0, "byte_index": 31},
+      "expected": "reject",
+      "reason": "last byte of the single path element flipped",
+      "citation": "BIP 360, Script Validation: 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_path_byte_flip_duplicate_leaves",
+      "category": "merkle_path_integrity",
+      "base_vector": "p2mr_duplicate_leaves",
+      "operation": {"op": "path_byte_flip", "leaf_index": 2, "byte_index": 40},
+      "expected": "reject",
+      "reason": "flip lands in the second path element of a depth-2 leaf",
+      "citation": "BIP 360, Script Validation: 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_control_truncate_one_byte",
+      "category": "control_block_length",
+      "base_vector": "p2mr_three_leaf_complex",
+      "operation": {"op": "control_truncate", "leaf_index": 1, "drop_bytes": 1},
+      "expected": "reject",
+      "reason": "length 1 + 32m - 1 is not a valid control block length",
+      "citation": "BIP 360, Script Validation: control block 'must have length 1 + 32 * m ... Fail if it does not have such a length.'"
+    },
+    {
+      "id": "mut_control_truncate_full_element",
+      "category": "control_block_length",
+      "base_vector": "p2mr_three_leaf_alternative",
+      "operation": {"op": "control_truncate", "leaf_index": 2, "drop_bytes": 32},
+      "expected": "reject",
+      "reason": "dropping a whole path element keeps the length valid but changes the walk: root mismatch",
+      "citation": "BIP 360, Script Validation: 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_control_extend_16_bytes",
+      "category": "control_block_length",
+      "base_vector": "p2mr_single_leaf_script_tree",
+      "operation": {"op": "control_extend", "leaf_index": 0, "extra_bytes": 16},
+      "expected": "reject",
+      "reason": "1 + 16 bytes is not of the form 1 + 32m",
+      "citation": "BIP 360, Script Validation: control block 'must have length 1 + 32 * m ... Fail if it does not have such a length.'"
+    },
+    {
+      "id": "mut_parity_bit_zero_single_leaf",
+      "category": "control_byte",
+      "base_vector": "p2mr_single_leaf_script_tree",
+      "operation": {"op": "parity_zero", "leaf_index": 0},
+      "expected": "reject",
+      "reason": "control byte 0xc0 instead of 0xc1",
+      "citation": "BIP 360, Script Validation: 'the last bit of c[0] is unused and must be 1.'"
+    },
+    {
+      "id": "mut_parity_bit_zero_two_leaf",
+      "category": "control_byte",
+      "base_vector": "p2mr_two_leaf_same_version",
+      "operation": {"op": "parity_zero", "leaf_index": 1},
+      "expected": "reject",
+      "reason": "parity bit cleared on a depth-1 leaf's control byte",
+      "citation": "BIP 360, Script Validation: 'the last bit of c[0] is unused and must be 1.'"
+    },
+    {
+      "id": "mut_leaf_version_mismatch_c2",
+      "category": "control_byte",
+      "base_vector": "p2mr_two_leaf_same_version",
+      "operation": {"op": "set_control_version", "leaf_index": 0, "new_version": 194},
+      "expected": "reject",
+      "reason": "control byte claims leaf version 0xc2 for a 0xc0 leaf: tapleaf hash changes, root mismatch",
+      "citation": "BIP 360, Script Validation: 'Let v = c[0] & 0xfe be the leaf version' and 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_leaf_version_mismatch_future",
+      "category": "control_byte",
+      "base_vector": "p2mr_different_version_leaves",
+      "operation": {"op": "set_control_version", "leaf_index": 1, "new_version": 192},
+      "expected": "reject",
+      "reason": "the 0xfa (future-version) leaf presented under version 0xc0: root mismatch",
+      "citation": "BIP 360, Script Validation: 'Let v = c[0] & 0xfe be the leaf version' and 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_script_byte_flip_checksig",
+      "category": "leaf_script_integrity",
+      "base_vector": "p2mr_single_leaf_script_tree",
+      "operation": {"op": "script_byte_flip", "leaf_index": 0, "byte_index": 10},
+      "expected": "reject",
+      "reason": "one byte of the committed pubkey inside the leaf script flipped",
+      "citation": "BIP 360, Script Validation: k0 commits to the exact script bytes; 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_script_byte_flip_lightning",
+      "category": "leaf_script_integrity",
+      "base_vector": "p2mr_simple_lightning_contract",
+      "operation": {"op": "script_byte_flip", "leaf_index": 1, "byte_index": 0},
+      "expected": "reject",
+      "reason": "first opcode of the contract leaf altered",
+      "citation": "BIP 360, Script Validation: k0 commits to the exact script bytes; 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_script_truncate_tail",
+      "category": "leaf_script_integrity",
+      "base_vector": "p2mr_two_leaf_same_version",
+      "operation": {"op": "script_truncate", "leaf_index": 0, "drop_bytes": 1},
+      "expected": "reject",
+      "reason": "truncated script changes both compact_size prefix and content of the tapleaf preimage",
+      "citation": "BIP 360, Script Validation: k0 = TapLeaf(v || compact_size(size of s) || s); 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_path_reorder_three_leaf_complex",
+      "category": "merkle_path_integrity",
+      "base_vector": "p2mr_three_leaf_complex",
+      "operation": {"op": "path_reorder", "leaf_index": 1},
+      "expected": "reject",
+      "reason": "swapping the two path elements of a depth-2 leaf changes the fold order and the root",
+      "citation": "BIP 360, Script Validation: e_j are consumed in order j = 0..m-1; 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_path_reorder_three_leaf_alternative",
+      "category": "merkle_path_integrity",
+      "base_vector": "p2mr_three_leaf_alternative",
+      "operation": {"op": "path_reorder", "leaf_index": 2},
+      "expected": "reject",
+      "reason": "same reorder applied to the alternative tree shape",
+      "citation": "BIP 360, Script Validation: e_j are consumed in order j = 0..m-1; 'If q != r, fail.'"
+    },
+    {
+      "id": "mut_empty_control_block",
+      "category": "control_block_length",
+      "base_vector": "p2mr_single_leaf_script_tree",
+      "operation": {"op": "empty_control", "leaf_index": 0},
+      "expected": "reject",
+      "reason": "zero-length control block",
+      "citation": "BIP 360, Script Validation: control block 'must have length 1 + 32 * m'."
+    },
+    {
+      "id": "mut_spk_segwit_v1",
+      "category": "script_pubkey_shape",
+      "base_vector": "p2mr_three_leaf_complex",
+      "operation": {"op": "spk_replace_version", "new_version_byte": 81},
+      "expected": "reject",
+      "reason": "0x51 (OP_1) makes this a P2TR-shaped output, not P2MR",
+      "citation": "BIP 360, ScriptPubKey: 'OP_2 indicates SegWit version 2.'"
+    },
+    {
+      "id": "mut_spk_push_33",
+      "category": "script_pubkey_shape",
+      "base_vector": "p2mr_single_leaf_script_tree",
+      "operation": {"op": "spk_push_33"},
+      "expected": "reject",
+      "reason": "33-byte push is not a valid P2MR witness program",
+      "citation": "BIP 360, Specification: 'a SegWit version 2 byte followed by the [32-byte] Merkle root'."
+    },
+    {
+      "id": "mut_spk_trailing_byte",
+      "category": "script_pubkey_shape",
+      "base_vector": "p2mr_two_leaf_same_version",
+      "operation": {"op": "spk_append_byte", "byte": 0},
+      "expected": "reject",
+      "reason": "trailing byte makes the scriptPubKey 35 bytes",
+      "citation": "BIP 360, ScriptPubKey: OP_2 OP_PUSHBYTES_32 <hash> is exactly 34 bytes."
+    },
+    {
+      "id": "mut_addr_char_flip_payload",
+      "category": "address_encoding",
+      "base_vector": "p2mr_single_leaf_script_tree",
+      "operation": {"op": "addr_char_flip", "char_index": 10},
+      "expected": "reject",
+      "reason": "one flipped payload character must fail the bech32m checksum",
+      "citation": "BIP 350: bech32m checksum verification."
+    },
+    {
+      "id": "mut_addr_char_flip_checksum",
+      "category": "address_encoding",
+      "base_vector": "p2mr_three_leaf_complex",
+      "operation": {"op": "addr_char_flip", "char_index": -1},
+      "expected": "reject",
+      "reason": "one flipped checksum character must fail verification",
+      "citation": "BIP 350: bech32m checksum verification."
+    },
+    {
+      "id": "mut_addr_bech32_constant",
+      "category": "address_encoding",
+      "base_vector": "p2mr_single_leaf_script_tree",
+      "operation": {"op": "addr_encode_bech32_constant"},
+      "expected": "reject",
+      "reason": "encoding the v2 program with the legacy bech32 constant (1) must not decode as bech32m",
+      "citation": "BIP 350: witness versions 1+ use the bech32m constant 0x2bc830a3."
+    },
+    {
+      "id": "mut_addr_witness_version_1",
+      "category": "address_encoding",
+      "base_vector": "p2mr_two_leaf_same_version",
+      "operation": {"op": "addr_encode_witver", "witver": 1},
+      "expected": "reject",
+      "reason": "the same 32-byte root encoded as a v1 (bc1p) address is a valid bech32m string but not a P2MR address",
+      "citation": "BIP 360, Address Format: 'P2MR outputs use SegWit version 2 ... addresses that start with bc1z.'"
+    },
+    {
+      "id": "mut_accept_sibling_leaf_control",
+      "category": "sanity_accept",
+      "base_vector": "p2mr_three_leaf_complex",
+      "operation": {"op": "use_leaf", "leaf_index": 2},
+      "expected": "accept",
+      "reason": "a different leaf of the same tree, presented with its own script and control block, must validate",
+      "citation": "BIP 360, Script Validation: any committed leaf path recomputes to q."
+    }
+  ]
+}

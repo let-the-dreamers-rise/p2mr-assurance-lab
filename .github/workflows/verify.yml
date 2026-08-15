@@ -1,0 +1,16 @@
+name: verify
+
+on: [push, pull_request]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Official vectors and boundary tests
+        run: python verify_vectors.py
+      - name: Adversarial mutation corpus
+        run: python run_mutations.py

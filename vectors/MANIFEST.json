@@ -1,0 +1,8 @@
+{
+  "upstream_repository": "https://github.com/bitcoin/bips",
+  "upstream_commit": "ed4ffcb6a48d4dc4fdfc11cdba783c233db8c66e",
+  "upstream_path": "bip-0360/ref-impl/common/tests/data/p2mr_construction.json",
+  "fixture": "p2mr_construction.json",
+  "sha256": "cd02da0b3c5bcbea98ed4d3141ebaf71344ee5acc8eb543841b7d2ed853251c7",
+  "note": "Byte-identical copy of the official BIP 360 construction fixture at the pinned commit. verify_vectors.py refuses to run if the local copy's SHA-256 differs from this pin."
+}

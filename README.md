@@ -1,9 +1,22 @@
 # P2MR Assurance Lab
 
-Independent conformance testing for BIP 360 (Pay-to-Merkle-Root): a version-pinned
-verifier for the official construction vectors, local boundary tests, and an
-adversarial mutation corpus in which every case cites the specification text that
-defines its expected outcome.
+Independent conformance testing for BIP 360 (Pay-to-Merkle-Root) **and the first
+open measurement of what post-quantum signatures would cost inside a Bitcoin
+transaction** — the question BIP 360's own design leaves open.
+
+Three things live here, all reproducible in minutes with zero dependencies:
+
+1. **A post-quantum cost model** (`pqc/`) — what ML-DSA (FIPS 204) and SLH-DSA
+   (FIPS 205) signatures cost as real Bitcoin witness data. Headline result: a
+   post-quantum P2MR input costs **17x to 131x** a Schnorr key-path spend, and
+   block input capacity falls from ~17,391 to as few as **133** inputs.
+2. **An independent differential audit** (`differential/`) — a from-scratch
+   implementation cross-checked against the official reference on 16 vectors and
+   2000 random trees, which already surfaced **two real conformance/robustness
+   gaps** (see `FINDINGS.md`).
+3. **A pinned conformance suite** — official vectors, boundary tests, and an
+   adversarial mutation corpus in which every case cites the specification text
+   that defines its expected outcome.
 
 > BIP 360 (P2MR) is a Draft and is not activated on Bitcoin mainnet. P2MR can
 > mitigate long-exposure (revealed-key) risk only under fresh-key discipline; it
@@ -17,8 +30,10 @@ Python 3.10+. No packages, no network access, no configuration.
 ```
 git clone https://github.com/let-the-dreamers-rise/p2mr-assurance-lab
 cd p2mr-assurance-lab
-python verify_vectors.py
-python run_mutations.py
+python verify_vectors.py                    # official vectors + boundary tests
+python run_mutations.py                     # adversarial mutation corpus
+python differential/run_differential.py     # vs the official reference impl
+python pqc/pqc_bench.py                      # post-quantum cost measurement
 ```
 
 Expected output (tail of each run):
@@ -88,8 +103,12 @@ revision is weak evidence, so nothing here runs against moving `master`.
 p2mr.py              construction + validation primitives (zero dependencies)
 verify_vectors.py    official vectors + boundary tests (entry point)
 run_mutations.py     adversarial mutation corpus runner
-vectors/             pinned official fixture + MANIFEST.json
+pinning.py           sha256 pin enforcement shared by every runner
+differential/        run_differential.py + vendored pinned reference impl
+pqc/                 pqc_bench.py + PARAMS.md (post-quantum cost model)
+vectors/             pinned official fixtures + MANIFEST.json
 mutations/           corpus.json -- one citation per case
+FINDINGS.md          graded results of the differential audit
 docs/                grant proposal (PDF)
 ```
 

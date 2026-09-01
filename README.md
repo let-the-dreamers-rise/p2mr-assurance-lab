@@ -11,9 +11,9 @@ Three things live here, all reproducible in minutes with zero dependencies:
    post-quantum P2MR input costs **17x to 131x** a Schnorr key-path spend, and
    block input capacity falls from ~17,391 to as few as **133** inputs.
 2. **An independent differential audit** (`differential/`) — a from-scratch
-   implementation cross-checked against the official reference on 16 vectors and
-   2000 random trees, which already surfaced **two real conformance/robustness
-   gaps** (see `FINDINGS.md`).
+   implementation cross-checked against the official reference on 13 official
+   construction vectors and 2000 random trees, which already surfaced **two real
+   conformance/robustness gaps** (see `FINDINGS.md`).
 3. **A pinned conformance suite** — official vectors, boundary tests, and an
    adversarial mutation corpus in which every case cites the specification text
    that defines its expected outcome.
@@ -47,7 +47,7 @@ sha256:  cd02da0b3c5bcbea98ed4d3141ebaf71344ee5acc8eb543841b7d2ed853251c7
 ```
 
 ```
-24/24 adversarial mutation cases PASS
+27/27 adversarial mutation cases PASS
 every case cites the specification text that defines its expected outcome
 ```
 
@@ -75,7 +75,7 @@ corruption, strict 32-byte witness-program length, SegWit version
 discrimination (a v1 output must not parse as P2MR), and full control-block
 reconstruction for a fresh multi-leaf tree.
 
-**Adversarial mutations (24).** Each case starts from an official vector,
+**Adversarial mutations (27).** Each case starts from an official vector,
 applies one machine-defined mutation -- merkle-path byte flips, control-block
 truncation/extension, parity-bit clearing (the specification requires the
 control byte's low bit to be 1), leaf-version mismatches, script tampering,

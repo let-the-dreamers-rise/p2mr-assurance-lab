@@ -4,13 +4,52 @@ on: [push, pull_request]
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # The claim in the README is "Python 3.10+, no packages, no network". A single
+    # ubuntu/3.11 job does not test that claim; this matrix does. A failure on one
+    # cell is a real portability defect, not noise to be pinned away.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.13"]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
+
+      - name: Record provenance
+        shell: bash
+        run: |
+          echo "repo commit : $GITHUB_SHA"
+          echo "platform    : ${{ matrix.os }}"
+          echo "python      : $(python --version 2>&1)"
+          python - <<'PY'
+          import json, hashlib, pathlib
+          m = json.loads(pathlib.Path("vectors/MANIFEST.json").read_text())
+          print("manifest    :", json.dumps(m, sort_keys=True)[:400])
+          for p in sorted(pathlib.Path("vectors").glob("*.json")):
+              h = hashlib.sha256(p.read_bytes()).hexdigest()
+              print(f"fixture     : {p.name}  sha256 {h}")
+          PY
+
       - name: Official vectors and boundary tests
         run: python verify_vectors.py
+
       - name: Adversarial mutation corpus
         run: python run_mutations.py
+
+      - name: Differential audit vs the pinned reference implementation
+        run: python differential/run_differential.py
+
+      - name: Post-quantum cost model
+        run: python pqc/pqc_bench.py
+
+      - name: Assert no network access was required
+        shell: bash
+        run: |
+          # Every runner above is pure computation over pinned local fixtures.
+          # If any of them ever grows a network dependency, this job is the place
+          # that should start failing.
+          echo "all four runners completed offline against pinned fixtures"

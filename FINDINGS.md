@@ -74,3 +74,9 @@ a suggested regression test before any public write-up, and re-tested after any
 fix. F1 and F3 are framed to the authors as questions, not defects. This document
 records the state of the analysis at the pinned commit; it will be versioned as
 the draft evolves.
+
+---
+
+## Other implementations
+
+- **bitcoinjs-lib PR #2312** (`e079eb4`): 2006 of 2007 cases agree. Two low-severity gaps: duplicate leaves get the longer control block, and the witness builder has no m <= 128 bound. Details and reproduction steps are in `implementations/bitcoinjs-lib/README.md`.

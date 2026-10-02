@@ -120,6 +120,7 @@ verify_vectors.py    official vectors + boundary tests (entry point)
 run_mutations.py     adversarial mutation corpus runner
 pinning.py           sha256 pin enforcement shared by every runner
 differential/        run_differential.py + vendored pinned reference impl
+implementations/     differential runs against other P2MR implementations (bitcoinjs-lib)
 pqc/                 pqc_bench.py + PARAMS.md (post-quantum cost model)
 vectors/             pinned official fixtures + MANIFEST.json
 mutations/           corpus.json -- one citation per case

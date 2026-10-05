@@ -112,9 +112,70 @@ for i in range(200):
     cases.append(ok_case(f"random_{i:03d}", "random", rtree(rng.randint(0, 7)),
                          "seeded random tree (seed 360)"))
 
+# 4. Spend validation: (witness program, leaf script, control block) triples that
+#    a node or validator must accept or reject under BIP 360's validation rules.
+def spend(cid, program, script, control, valid, note):
+    try:
+        p2mr.validate_script_path(program, script, control)
+        oracle = True
+    except p2mr.P2MRError as e:
+        oracle = str(e)
+    if (oracle is True) != valid:
+        raise SystemExit(f"oracle disagrees with the intended outcome for {cid}: {oracle}")
+    expect = {"valid": True} if valid else {"reject": True, "oracle_error": oracle}
+    return {"id": cid, "group": "spend", "note": note,
+            "spend": {"program": program.hex(), "script": script.hex(),
+                      "control": control.hex()},
+            "expect": expect}
+
+
+def leaf_spends(tree):
+    root, leaves = p2mr.parse_script_tree(tree)
+    out = []
+    for lf in leaves:
+        v = lf["node"].get("leafVersion", 0xC0)
+        out.append((root, bytes.fromhex(lf["node"]["script"]),
+                    bytes([v | 1]) + b"".join(lf["path"])))
+    return out
+
+
+Z = bytes(32)
+three = [leaf("51"), [leaf("52", 0xC2), leaf("53")]]
+for i, (q, s, c) in enumerate(leaf_spends(three)):
+    cases.append(spend(f"spend_valid_leaf{i}", q, s, c, True,
+                       "honest script-path spend of each leaf"))
+q, s, c = leaf_spends(leaf("51"))[0]
+cases.append(spend("spend_valid_single_leaf_m0", q, s, c, True,
+                   "single-leaf tree: control block is the control byte alone (m = 0)"))
+deep = leaf_spends(chain(128))[0]
+cases.append(spend("spend_valid_depth_128", *deep, True, "m = 128 is the maximum allowed"))
+deep = leaf_spends(chain(129))[0]
+cases.append(spend("spend_reject_depth_129", *deep, False,
+                   "m = 129 must be rejected even though the root would match"))
+q, s, c = leaf_spends(three)[1]
+cases.append(spend("spend_reject_zero_padding", q, s, c + Z, False,
+                   "appending a 32-byte zero element changes the computed root; never a valid spend"))
+cases.append(spend("spend_reject_trailing_byte", q, s, c + b"\x00", False,
+                   "control block length must be 1 + 32*m"))
+cases.append(spend("spend_reject_truncated", q, s, c[:-1], False,
+                   "control block length must be 1 + 32*m"))
+cases.append(spend("spend_reject_empty_control", q, s, b"", False,
+                   "an empty control block is not 1 + 32*m"))
+cases.append(spend("spend_reject_parity_zero", q, s, bytes([c[0] & 0xFE]) + c[1:], False,
+                   "BIP 360: the control byte's low bit must be 1"))
+cases.append(spend("spend_reject_wrong_leaf_version", q, s, bytes([0xC1]) + c[1:], False,
+                   "control byte claims leaf version 0xc0 for a 0xc2 leaf; root mismatch"))
+cases.append(spend("spend_reject_wrong_script", q, bytes.fromhex("54"), c, False,
+                   "a script not committed in the tree"))
+cases.append(spend("spend_reject_reversed_path", q, s,
+                   c[:1] + c[33:65] + c[1:33], False,
+                   "path elements are ordered leaf to root; reversing them changes the root"))
+cases.append(spend("spend_reject_other_program", bytes(31) + b"\x01", s, c, False,
+                   "a valid control block for a different witness program"))
+
 pack = {
     "name": "p2mr-conformance-pack",
-    "version": 1,
+    "version": 2,
     "spec": "BIP 360 (Pay-to-Merkle-Root), Draft",
     "upstream_bips_commit": UPSTREAM,
     "oracle": "p2mr.py in let-the-dreamers-rise/p2mr-assurance-lab",

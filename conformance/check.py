@@ -3,10 +3,10 @@
     python conformance/check.py --adapter "<command>"
 
 The adapter is any program, in any language, that reads a JSON array of
-{"id", "script_tree"} on stdin and writes a JSON array on stdout with, per case,
+{"id", "script_tree"} (or {"id", "spend"}) on stdin and writes a JSON array on stdout with, per case,
 either {"id", "script_pubkey", "address", "control_blocks"} (hex strings, control
 blocks in depth-first leaf order) or {"id", "error": "..."} when it rejects the
-tree. See conformance/README.md. Exit status is 0 only if every case conforms.
+input; spend cases answer {"id", "valid": true}. See conformance/README.md. Exit status is 0 only if every case conforms.
 """
 import argparse
 import json
@@ -28,7 +28,8 @@ def main():
 
     pack = json.load(open(args.vectors))
     cases = [c for c in pack["cases"] if not args.group or c["group"] in args.group]
-    stdin = json.dumps([{"id": c["id"], "script_tree": c["script_tree"]} for c in cases])
+    stdin = json.dumps([{"id": c["id"], "spend": c["spend"]} if "spend" in c
+                        else {"id": c["id"], "script_tree": c["script_tree"]} for c in cases])
     cmd = args.adapter if os.name == "nt" else shlex.split(args.adapter)
     proc = subprocess.run(cmd, input=stdin, capture_output=True, text=True,
                           shell=os.name == "nt")
@@ -48,7 +49,9 @@ def main():
         if r is None:
             why = "no result returned"
         elif exp.get("reject"):
-            why = None if "error" in r else "accepted a tree the spec requires rejecting"
+            why = None if "error" in r else "accepted an input the spec requires rejecting"
+        elif exp.get("valid"):
+            why = None if r.get("valid") is True else f"rejected a valid spend: {r.get('error')}"
         elif "error" in r:
             why = f"rejected a valid tree: {r['error']}"
         else:

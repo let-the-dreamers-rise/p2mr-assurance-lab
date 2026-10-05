@@ -12,7 +12,7 @@ adapter for your library, and `check.py` does the rest.
 
 ## What is in the pack
 
-`vectors.json` holds 215 cases, every expected value computed by this lab's
+`vectors.json` holds 230 cases, every expected value computed by this lab's
 `p2mr.py` (which agrees byte for byte with the pinned BIP 360 reference):
 
 | Group | Cases | What it checks |
@@ -20,8 +20,9 @@ adapter for your library, and `check.py` does the rest.
 | official | 8 | Every official BIP 360 construction vector that takes only a script tree, checked against its published expected values when the pack is generated |
 | boundary | 7 | Depth exactly 128 (accept), depth 129 (reject, the gap fixed in bitcoin/bips#2273), odd leaf version 0xc1 (reject, never coerce), a three-child branch (reject), duplicate leaves, non-default even leaf versions, an empty script |
 | random | 200 | Seeded random trees (seed 360), depth 0 to 7, mixed leaf versions |
+| spend | 15 | Script-path spend validation, for node and validator code: honest spends (including m = 0 and m = 128) must pass; m = 129, an appended zero element, wrong lengths, a parity bit of 0, a wrong leaf version, reversed path order, an uncommitted script and a foreign witness program must all be rejected |
 
-For each accepted tree it checks the scriptPubKey, the mainnet bech32m address,
+For each tree case it checks the scriptPubKey, the mainnet bech32m address,
 and the control block of every leaf in depth-first order.
 
 ## Run it against your implementation
@@ -34,13 +35,16 @@ python conformance/check.py --adapter "<command that runs your adapter>"
 
 The adapter contract:
 
-- **stdin**: a JSON array of `{"id": ..., "script_tree": ...}`. The tree uses BIP
+- **stdin**: a JSON array of `{"id": ..., "script_tree": ...}` or, for spend
+  cases, `{"id": ..., "spend": {"program", "script", "control"}}` (hex). The tree uses BIP
   360's own vector format: a leaf is `{"script": "<hex>", "leafVersion": 192}`, a
   branch is a two-element array `[left, right]`.
 - **stdout**: a JSON array with one object per case, either
   `{"id", "script_pubkey", "address", "control_blocks"}` (hex strings; control
-  blocks in depth-first leaf order) or `{"id", "error": "<message>"}` when your
-  library rejects the tree.
+  blocks in depth-first leaf order), `{"id", "valid": true}` for an accepted
+  spend, or `{"id", "error": "<message>"}` when your library rejects the input.
+  A library that only builds outputs can skip spends with `--group official
+  --group boundary --group random`; one that only validates can run `--group spend`.
 
 Exit status is 0 only if every case conforms. `--json report.json` writes a
 machine-readable report; `--group boundary` runs one group.

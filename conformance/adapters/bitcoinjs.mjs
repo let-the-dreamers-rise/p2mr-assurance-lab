@@ -18,6 +18,12 @@ for await (const chunk of process.stdin) input += chunk;
 const out = [];
 for (const c of JSON.parse(input)) {
   try {
+    if (c.spend) {
+      const output = Buffer.concat([Buffer.from([0x52, 0x20]), h(c.spend.program)]);
+      payments.p2mr({ output, witness: [h(c.spend.script), h(c.spend.control)] });
+      out.push({ id: c.id, valid: true });
+      continue;
+    }
     if (!c.script_tree) throw new Error('empty script tree');
     const tree = conv(c.script_tree);
     const p = payments.p2mr({ scriptTree: tree });

@@ -46,10 +46,17 @@ jobs:
       - name: Post-quantum cost model
         run: python pqc/pqc_bench.py
 
+      - name: Portable conformance kit (regenerate, then self-test)
+        shell: bash
+        run: |
+          python conformance/gen_vectors.py
+          git diff --exit-code -- conformance/vectors.json
+          python conformance/check.py --adapter "python conformance/adapters/reference.py"
+
       - name: Assert no network access was required
         shell: bash
         run: |
           # Every runner above is pure computation over pinned local fixtures.
           # If any of them ever grows a network dependency, this job is the place
           # that should start failing.
-          echo "all four runners completed offline against pinned fixtures"
+          echo "all five runners completed offline against pinned fixtures"

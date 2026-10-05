@@ -24,6 +24,16 @@ Three things live here, all reproducible in minutes with zero dependencies:
 > does not by itself defend the reveal-to-confirmation window, and nothing in
 > this work makes Bitcoin quantum-safe today.
 
+## Test your own P2MR implementation
+
+`conformance/` is a portable kit: 215 cases (official vectors, spec boundaries,
+seeded random trees) and one command that checks any library, in any language,
+through a small adapter. See [`conformance/README.md`](conformance/README.md).
+
+```
+python conformance/check.py --adapter "<command that runs your adapter>"
+```
+
 ## Verify (ten minutes, zero dependencies)
 
 Python 3.10+. No packages, no network access, no configuration.

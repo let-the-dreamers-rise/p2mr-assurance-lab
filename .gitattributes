@@ -1,3 +1,4 @@
 vectors/p2mr_construction.json -text
 vectors/p2mr_pqc_construction.json -text
 differential/upstream/p2mr_ref.py -text
+conformance/vectors.json -text

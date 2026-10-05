@@ -1,6 +1,6 @@
 // bitcoinjs-lib adapter for the P2MR conformance pack.
-// Built from implementations/bitcoinjs-lib/run.mjs, which produced the 2026-10-02
-// results; this adapter itself has not yet been run against the pack.
+// Run on 2026-10-05 against PR #2312 at e079eb4: 225/231 (see
+// implementations/bitcoinjs-lib/README.md).
 //   BJS=/path/to/built/bitcoinjs-lib python conformance/check.py \
 //       --adapter "node conformance/adapters/bitcoinjs.mjs"
 const BJS = process.env.BJS;

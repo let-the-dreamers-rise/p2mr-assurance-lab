@@ -12,7 +12,7 @@ adapter for your library, and `check.py` does the rest.
 
 ## What is in the pack
 
-`vectors.json` holds 230 cases, every expected value computed by this lab's
+`vectors.json` holds 231 cases, every expected value computed by this lab's
 `p2mr.py` (which agrees byte for byte with the pinned BIP 360 reference):
 
 | Group | Cases | What it checks |
@@ -20,7 +20,7 @@ adapter for your library, and `check.py` does the rest.
 | official | 8 | Every official BIP 360 construction vector that takes only a script tree, checked against its published expected values when the pack is generated |
 | boundary | 7 | Depth exactly 128 (accept), depth 129 (reject, the gap fixed in bitcoin/bips#2273), odd leaf version 0xc1 (reject, never coerce), a three-child branch (reject), duplicate leaves, non-default even leaf versions, an empty script |
 | random | 200 | Seeded random trees (seed 360), depth 0 to 7, mixed leaf versions |
-| spend | 15 | Script-path spend validation, for node and validator code: honest spends (including m = 0 and m = 128) must pass; m = 129, an appended zero element, wrong lengths, a parity bit of 0, a wrong leaf version, reversed path order, an uncommitted script and a foreign witness program must all be rejected |
+| spend | 16 | Script-path spend validation, for node and validator code: honest spends (including m = 0, m = 128 and leaf version 0x00) must pass; m = 129, an appended zero element, wrong lengths, a parity bit of 0, a wrong leaf version, reversed path order, an uncommitted script and a foreign witness program must all be rejected |
 
 For each tree case it checks the scriptPubKey, the mainnet bech32m address,
 and the control block of every leaf in depth-first order.
@@ -54,7 +54,7 @@ Ready adapters:
 | Adapter | Run |
 |---|---|
 | This lab's `p2mr.py` (self-test) | `python conformance/check.py --adapter "python conformance/adapters/reference.py"` |
-| bitcoinjs-lib (PR #2312 branch, built) | `BJS=/path/to/bitcoinjs-lib python conformance/check.py --adapter "node conformance/adapters/bitcoinjs.mjs"` (built from the harness behind the 2026-10-02 results in `implementations/bitcoinjs-lib/`; not yet run against this pack) |
+| bitcoinjs-lib (PR #2312 branch, built) | `BJS=/path/to/bitcoinjs-lib python conformance/check.py --adapter "node conformance/adapters/bitcoinjs.mjs"`. Result: 225/231 at `e079eb4` on 2026-10-05; failures explained in `implementations/bitcoinjs-lib/README.md` |
 
 Writing one for your library is usually 30 lines: parse the tree, call your
 P2MR constructor, print the three values.

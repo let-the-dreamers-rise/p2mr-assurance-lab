@@ -147,6 +147,9 @@ for i, (q, s, c) in enumerate(leaf_spends(three)):
 q, s, c = leaf_spends(leaf("51"))[0]
 cases.append(spend("spend_valid_single_leaf_m0", q, s, c, True,
                    "single-leaf tree: control block is the control byte alone (m = 0)"))
+q0, s0, c0 = leaf_spends([leaf("51"), leaf("53", 0x00)])[1]
+cases.append(spend("spend_valid_leaf_version_00", q0, s0, c0, True,
+                   "leaf version 0x00 is even and valid; it must not be treated as 0xc0"))
 deep = leaf_spends(chain(128))[0]
 cases.append(spend("spend_valid_depth_128", *deep, True, "m = 128 is the maximum allowed"))
 deep = leaf_spends(chain(129))[0]

@@ -26,7 +26,7 @@ Three things live here, all reproducible in minutes with zero dependencies:
 
 ## Test your own P2MR implementation
 
-`conformance/` is a portable kit: 230 cases (official vectors, spec boundaries, spend validation,
+`conformance/` is a portable kit: 231 cases (official vectors, spec boundaries, spend validation,
 seeded random trees) and one command that checks any library, in any language,
 through a small adapter. See [`conformance/README.md`](conformance/README.md).
 

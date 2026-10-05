@@ -13,6 +13,20 @@ Oracle: this lab's `p2mr.py`, which agrees byte for byte with the BIP 360 refere
 | B2 | No depth bound when building a witness: a 129-deep tree yields a witness with m = 129, which bitcoinjs's own validator then rejects (`The script path is too long. Got 129, expected max 128.`). This is the same class as F2, fixed in the reference by bitcoin/bips#2273. | Low: pathological trees only |
 | - | Odd leaf version `0xc1`: already rejected by the taptree type check. | No issue |
 
+## Conformance kit run (2026-10-05, same commit `e079eb4`)
+
+`conformance/check.py` with `conformance/adapters/bitcoinjs.mjs`: **225 of 231
+cases pass.** The six failures are B1 (three duplicate-leaf cases), B2 (depth 129
+accepted), and one new class:
+
+| ID | What | Severity |
+|---|---|---|
+| B3 | Leaf version `0x00` is hashed as `0xc0`. `tapleafHash` in `ts_src/payments/bip341.ts` uses `leaf.version \|\| LEAF_VERSION_TAPSCRIPT`, and `0` is falsy. Building an output for a `0x00` leaf commits to the wrong leaf hash, and a valid spend of a `0x00` leaf is rejected (`Hash mismatch for p2mr witness`). The same line is on bitcoinjs-lib `master` and is shared with P2TR: a P2TR output for a `0x00` leaf is byte-identical to the `0xc0` one. | Low: only `0xc0` is in use today, but other even versions are valid upgrade hooks and this silently commits to a different script |
+
+Changing `||` to `??` fixes B3: with that one-character change the kit's two
+leaf-version failures pass, the P2TR outputs differ as they should, and
+bitcoinjs-lib's own suite still passes (2695 tests).
+
 ## Reproduce
 
 ```sh
@@ -22,4 +36,6 @@ cd /path/to/p2mr-assurance-lab/implementations/bitcoinjs-lib
 python3 gen_cases.py                 # writes cases.json (7 vectors + 2000 random trees)
 BJS=/path/to/bitcoinjs-lib node run.mjs    # differential
 BJS=/path/to/bitcoinjs-lib node edge.mjs   # depth-129 and odd-version probes
+cd /path/to/p2mr-assurance-lab
+BJS=/path/to/bitcoinjs-lib python3 conformance/check.py --adapter "node conformance/adapters/bitcoinjs.mjs"
 ```

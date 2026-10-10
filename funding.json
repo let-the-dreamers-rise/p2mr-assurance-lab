@@ -21,21 +21,41 @@
       "repositoryUrl": {
         "url": "https://github.com/let-the-dreamers-rise/p2mr-assurance-lab"
       },
-      "licenses": ["spdx:MIT"],
-      "tags": ["bitcoin", "post-quantum", "bip360", "conformance-testing", "security", "cryptography", "testing"]
+      "licenses": [
+        "spdx:MIT"
+      ],
+      "tags": [
+        "bitcoin",
+        "post-quantum",
+        "bip360",
+        "conformance-testing",
+        "security",
+        "cryptography",
+        "testing"
+      ]
     },
     {
       "guid": "rein",
       "name": "Rein",
-      "description": "A smart account an AI agent can operate but cannot drain. The human owns the account; the agent's key can only make calls the on-chain policy admits (target, function and payee allowlists, rolling spend windows, rate limits, approval ceiling, expiry, guardian breaker). simulate() returns the same refusal execute() would revert with. Verified on Base Sepolia, Whitechain Sepolia and GOAT testnet; a prompt-injected agent tried six ways to drain it and lost nothing. Ships with an MCP server, a Claude Code plugin, a GOAT SDK wallet provider, and rein scan, which reads an agent wallet's history on Base and prints the policy that history supports.",
+      "description": "Rein checks every payment waiting in a Safe multisig against who that Safe has actually paid, and how much, before the last signature: it flags address-poisoning lookalikes, first payments to strangers, amounts far above the usual and changes to who controls the Safe. Free and read-only, as a CLI (npm rein-wallet), a web page, a custom Safe App and a GitHub Action. The same check runs as a second key for AI agent wallets: protect(walletClient) wraps the viem client that Coinbase AgentKit, GOAT and ElizaOS sign with, x402 signatures included. Underneath is an MIT-licensed smart account an agent can operate but cannot drain, verified on Base Sepolia, Whitechain Sepolia and GOAT testnet. 232 JavaScript and 18 Python tests.",
       "webpageUrl": {
         "url": "https://github.com/let-the-dreamers-rise/rein"
       },
       "repositoryUrl": {
         "url": "https://github.com/let-the-dreamers-rise/rein"
       },
-      "licenses": ["spdx:MIT"],
-      "tags": ["ai-agents", "smart-contracts", "ethereum", "security", "mcp", "wallets"]
+      "licenses": [
+        "spdx:MIT"
+      ],
+      "tags": [
+        "ai-agents",
+        "smart-contracts",
+        "ethereum",
+        "security",
+        "safe-multisig",
+        "wallets",
+        "mcp"
+      ]
     },
     {
       "guid": "nyaya",
@@ -47,8 +67,15 @@
       "repositoryUrl": {
         "url": "https://github.com/let-the-dreamers-rise/nyaya"
       },
-      "licenses": ["spdx:MIT"],
-      "tags": ["llm", "benchmark", "evaluation", "ai"]
+      "licenses": [
+        "spdx:MIT"
+      ],
+      "tags": [
+        "llm",
+        "benchmark",
+        "evaluation",
+        "ai"
+      ]
     }
   ],
   "funding": {
@@ -68,7 +95,9 @@
         "amount": 25000,
         "currency": "USD",
         "frequency": "yearly",
-        "channels": ["bank-transfer"]
+        "channels": [
+          "bank-transfer"
+        ]
       },
       {
         "guid": "any-amount",
@@ -78,7 +107,9 @@
         "amount": 0,
         "currency": "USD",
         "frequency": "one-time",
-        "channels": ["bank-transfer"]
+        "channels": [
+          "bank-transfer"
+        ]
       }
     ],
     "history": []

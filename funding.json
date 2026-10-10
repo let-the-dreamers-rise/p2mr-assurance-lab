@@ -1,0 +1,86 @@
+{
+  "version": "v1.1.0",
+  "entity": {
+    "type": "individual",
+    "role": "maintainer",
+    "name": "Ashwin Goyal",
+    "email": "letthedreamersrise@gmail.com",
+    "description": "Independent open-source developer in India working on Bitcoin protocol testing and AI-agent safety. I wrote an independent test suite for BIP 360 (P2MR, Bitcoin's proposed post-quantum output type) that found two gaps in the official reference implementation; my fix was ACKed by BIP editor jonatack and merged (bitcoin/bips#2273). The same suite found a real bug in bitcoinjs-lib's P2MR pull request (#2312). I turned that work into a portable conformance kit that any BIP 360 implementation, in any language, can run in CI. I also maintain Rein, an MIT-licensed smart account that an AI agent can operate but cannot drain, and nyaya, an LLM benchmark that scores cost alongside accuracy.",
+    "webpageUrl": {
+      "url": "https://github.com/let-the-dreamers-rise"
+    }
+  },
+  "projects": [
+    {
+      "guid": "p2mr-assurance-lab",
+      "name": "P2MR Assurance Lab and BIP 360 Conformance Kit",
+      "description": "Independent conformance testing for BIP 360 (Pay-to-Merkle-Root), Bitcoin's proposed post-quantum output type. A from-scratch implementation cross-checked against the official reference on the official vectors and 2,000 random script trees found two real gaps in the reference, both fixed upstream in bitcoin/bips#2273 (merged). The conformance kit (231 cases: official vectors, spec boundaries, spend validation, seeded random trees) lets any P2MR library in any language run one command through a ~30-line adapter and get pass/fail per case; it already caught a 129-deep spend bug in bitcoinjs-lib's P2MR support. Also includes the first open cost model of post-quantum signatures (ML-DSA, SLH-DSA) as Bitcoin witness data. Funding pays for adapters for rust-bitcoin, btcd, BDK and bitcoinjs-lib, negative witness-level cases, and keeping the pack current as BIP 360 changes, so divergent implementations are caught before any activation.",
+      "webpageUrl": {
+        "url": "https://github.com/let-the-dreamers-rise/p2mr-assurance-lab"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/let-the-dreamers-rise/p2mr-assurance-lab"
+      },
+      "licenses": ["spdx:MIT"],
+      "tags": ["bitcoin", "post-quantum", "bip360", "conformance-testing", "security", "cryptography", "testing"]
+    },
+    {
+      "guid": "rein",
+      "name": "Rein",
+      "description": "A smart account an AI agent can operate but cannot drain. The human owns the account; the agent's key can only make calls the on-chain policy admits (target, function and payee allowlists, rolling spend windows, rate limits, approval ceiling, expiry, guardian breaker). simulate() returns the same refusal execute() would revert with. Verified on Base Sepolia, Whitechain Sepolia and GOAT testnet; a prompt-injected agent tried six ways to drain it and lost nothing. Ships with an MCP server, a Claude Code plugin, a GOAT SDK wallet provider, and rein scan, which reads an agent wallet's history on Base and prints the policy that history supports.",
+      "webpageUrl": {
+        "url": "https://github.com/let-the-dreamers-rise/rein"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/let-the-dreamers-rise/rein"
+      },
+      "licenses": ["spdx:MIT"],
+      "tags": ["ai-agents", "smart-contracts", "ethereum", "security", "mcp", "wallets"]
+    },
+    {
+      "guid": "nyaya",
+      "name": "nyaya",
+      "description": "An open LLM benchmark with 249 tests that scores cost alongside accuracy, so teams can see what each correct answer actually costs across models.",
+      "webpageUrl": {
+        "url": "https://github.com/let-the-dreamers-rise/nyaya"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/let-the-dreamers-rise/nyaya"
+      },
+      "licenses": ["spdx:MIT"],
+      "tags": ["llm", "benchmark", "evaluation", "ai"]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "bank-transfer",
+        "type": "bank",
+        "description": "Bank transfer to my Indian bank account. Details shared privately on request."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "p2mr-conformance-year",
+        "status": "active",
+        "name": "BIP 360 conformance kit, one year",
+        "description": "One year of maintaining the P2MR conformance kit: adapters for rust-bitcoin, btcd, BDK and bitcoinjs-lib, negative witness-level test cases, published conformance reports per implementation, and updates as BIP 360 changes.",
+        "amount": 25000,
+        "currency": "USD",
+        "frequency": "yearly",
+        "channels": ["bank-transfer"]
+      },
+      {
+        "guid": "any-amount",
+        "status": "active",
+        "name": "Support any amount",
+        "description": "One-time support for the projects above.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": ["bank-transfer"]
+      }
+    ],
+    "history": []
+  }
+}

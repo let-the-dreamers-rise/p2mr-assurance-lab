@@ -54,6 +54,7 @@ Ready adapters:
 | Adapter | Run |
 |---|---|
 | This lab's `p2mr.py` (self-test) | `python conformance/check.py --adapter "python conformance/adapters/reference.py"` |
+| btq-core (C++, links btq-core's own libraries) | Build steps in `conformance/adapters/btq-core/README.md`. Result: 231/231 at `5d18dd6` on 2026-10-10; details in `implementations/btq-core/README.md` |
 | bitcoinjs-lib (PR #2312 branch, built) | `BJS=/path/to/bitcoinjs-lib python conformance/check.py --adapter "node conformance/adapters/bitcoinjs.mjs"`. Result: 225/231 at `e079eb4` on 2026-10-05; failures explained in `implementations/bitcoinjs-lib/README.md` |
 
 Writing one for your library is usually 30 lines: parse the tree, call your

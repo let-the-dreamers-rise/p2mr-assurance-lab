@@ -17,7 +17,9 @@ Oracle: this lab's `p2mr.py`, which agrees byte for byte with the BIP 360 refere
 
 `conformance/check.py` with `conformance/adapters/bitcoinjs.mjs`: **225 of 231
 cases pass.** The six failures are B1 (three duplicate-leaf cases), B2 (depth 129
-accepted), and one new class:
+accepted), and a third class, B3, which duncan0k had already flagged by code reading in a
+[review of #2312](https://github.com/bitcoinjs/bitcoinjs-lib/pull/2312); this run confirms it by execution
+and shows it also affects `master`:
 
 | ID | What | Severity |
 |---|---|---|

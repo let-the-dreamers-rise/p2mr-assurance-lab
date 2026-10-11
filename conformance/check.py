@@ -1,6 +1,7 @@
 """Run the portable P2MR conformance pack against any implementation.
 
     python conformance/check.py --adapter "<command>"
+    python conformance/check.py --self-test   # this lab's own p2mr.py
 
 The adapter is any program, in any language, that reads a JSON array of
 {"id", "script_tree"} (or {"id", "spend"}) on stdin and writes a JSON array on stdout with, per case,
@@ -20,11 +21,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--adapter", required=True, help="command that runs your adapter")
+    who = ap.add_mutually_exclusive_group(required=True)
+    who.add_argument("--adapter", help="command that runs your adapter")
+    who.add_argument("--self-test", action="store_true",
+                     help="run the pack against this lab's own p2mr.py (adapters/reference.py)")
     ap.add_argument("--vectors", default=os.path.join(HERE, "vectors.json"))
     ap.add_argument("--group", action="append", help="only run these groups (repeatable)")
     ap.add_argument("--json", metavar="FILE", help="also write a machine-readable report")
     args = ap.parse_args()
+    if args.self_test:
+        args.adapter = subprocess.list2cmdline(
+            [sys.executable, os.path.join(HERE, "adapters", "reference.py")])
 
     pack = json.load(open(args.vectors))
     cases = [c for c in pack["cases"] if not args.group or c["group"] in args.group]
